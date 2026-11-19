@@ -41,11 +41,27 @@ export async function createProduct(productData: Omit<Product, '_id' | 'createdA
   return { ...product, _id: result.insertedId.toString() }
 }
 
+// export async function getProducts(): Promise<Product[]> {
+//   const db = await getDatabase()
+//   const products = db.collection<ProductDocument>('products')
+  
+//   const result = await products.find({}).toArray()
+//   return result
+//     .filter((product): product is ProductDocument & { _id: ObjectId } => !!product._id)
+//     .map(product => ({
+//       ...product,
+//       _id: product._id.toString()
+//     }))
+// }
 export async function getProducts(): Promise<Product[]> {
   const db = await getDatabase()
   const products = db.collection<ProductDocument>('products')
-  
-  const result = await products.find({}).toArray()
+
+  const result = await products
+    .find({})
+    .sort({ createdAt: 1, _id: 1 }) // oldest first; _id is the tiebreaker
+    .toArray()
+
   return result
     .filter((product): product is ProductDocument & { _id: ObjectId } => !!product._id)
     .map(product => ({
